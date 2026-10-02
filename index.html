@@ -6,7 +6,9 @@
 <title>DarkBound • Beta Key Generator</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+    box-sizing:border-box;
+}
 
 body{
     margin:0;
@@ -16,7 +18,7 @@ body{
     justify-content:center;
     font-family:Arial,sans-serif;
     background:#090b10;
-    color:#fff
+    color:#fff;
 }
 
 .card{
@@ -25,17 +27,17 @@ body{
     border:1px solid #252a35;
     border-radius:20px;
     background:#11151d;
-    box-shadow:0 20px 60px #0008
+    box-shadow:0 20px 60px #0008;
 }
 
 h1{
     margin:0 0 8px;
-    font-size:28px
+    font-size:28px;
 }
 
 p{
     color:#9da6b5;
-    margin-top:0
+    margin-top:0;
 }
 
 button{
@@ -48,16 +50,16 @@ button{
     color:#111;
     font-weight:bold;
     font-size:16px;
-    cursor:pointer
+    cursor:pointer;
 }
 
 button:hover{
-    opacity:.9
+    opacity:.9;
 }
 
 button:disabled{
     opacity:.5;
-    cursor:not-allowed
+    cursor:not-allowed;
 }
 
 textarea{
@@ -71,20 +73,20 @@ textarea{
     border:1px solid #303744;
     border-radius:10px;
     font-family:monospace;
-    font-size:14px
+    font-size:14px;
 }
 
 .row{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:10px
+    gap:10px;
 }
 
 label{
     display:block;
     margin-top:18px;
     color:#aeb7c6;
-    font-size:14px
+    font-size:14px;
 }
 
 input{
@@ -95,14 +97,14 @@ input{
     border:1px solid #303744;
     background:#090b10;
     color:#fff;
-    font-size:15px
+    font-size:15px;
 }
 
 .status{
     min-height:20px;
     margin-top:12px;
     color:#8fe3a3;
-    font-size:14px
+    font-size:14px;
 }
 </style>
 </head>
@@ -111,62 +113,61 @@ input{
 
 <div class="card">
 
-<h1>🎮 DarkBound Beta</h1>
+    <h1>🎮 DarkBound Beta</h1>
 
-<p>Gerador de chaves para testes fechados.</p>
+    <p>Gerador de chaves para testes fechados.</p>
 
-<label>Quantidade de keys</label>
+    <label>Quantidade de keys</label>
 
-<input
-    id="amount"
-    type="number"
-    min="1"
-    max="100"
-    value="5"
->
+    <input
+        id="amount"
+        type="number"
+        min="1"
+        max="100"
+        value="5"
+    >
 
-<div class="row">
+    <div class="row">
 
-<button id="generateButton" onclick="generate()">
-GERAR KEYS
-</button>
+        <button
+            id="generateButton"
+            onclick="generate()"
+        >
+            GERAR KEYS
+        </button>
 
-<button onclick="copyKeys()">
-COPIAR
-</button>
+        <button onclick="copyKeys()">
+            COPIAR
+        </button>
 
-</div>
+    </div>
 
-<textarea
-    id="keys"
-    readonly
-    placeholder="As keys aparecerão aqui..."
-></textarea>
+    <textarea
+        id="keys"
+        readonly
+        placeholder="As keys aparecerão aqui..."
+    ></textarea>
 
-<div id="status" class="status"></div>
+    <div id="status" class="status"></div>
 
 </div>
 
 <script>
 
-/* ================================
+/* =================================
    SUPABASE
-================================ */
+================================= */
 
 const SUPABASE_URL =
 "https://lbqlrwujudpnlgjjttat.supabase.co";
 
-/*
-   COLE AQUI SUA PUBLISHABLE KEY
-   do Supabase.
-*/
 const SUPABASE_KEY =
-"COLE_SUA_PUBLISHABLE_KEY_AQUI";
+"sb_publishable_au9FS37ayZs1ChR-A0DrTQ_JOKZILhh";
 
 
-/* ================================
-   GERADOR
-================================ */
+/* =================================
+   GERAR PARTE ALEATÓRIA
+================================= */
 
 function randomPart(length){
 
@@ -178,23 +179,22 @@ function randomPart(length){
 
     crypto.getRandomValues(bytes);
 
-    let out = "";
+    let resultado = "";
 
     for(let i = 0; i < length; i++){
 
-        out += chars[
-            bytes[i] % chars.length
-        ];
+        resultado +=
+        chars[bytes[i] % chars.length];
 
     }
 
-    return out;
+    return resultado;
 }
 
 
-/* ================================
-   GERAR E SALVAR
-================================ */
+/* =================================
+   GERAR KEYS
+================================= */
 
 async function generate(){
 
@@ -207,14 +207,15 @@ async function generate(){
     const textarea =
     document.getElementById("keys");
 
+    const amountInput =
+    document.getElementById("amount");
+
     const amount =
     Math.min(
         100,
         Math.max(
             1,
-            Number(
-                document.getElementById("amount").value
-            ) || 1
+            Number(amountInput.value) || 1
         )
     );
 
@@ -223,17 +224,19 @@ async function generate(){
     status.textContent =
     "Gerando e salvando as keys...";
 
+    textarea.value = "";
+
     const keys = [];
 
     for(let i = 0; i < amount; i++){
 
-        keys.push(
-            "DARKBOUND-BETA-" +
-            randomPart(4) +
-            "-" +
-            randomPart(4)
-        );
+        const key =
+        "DARKBOUND-BETA-" +
+        randomPart(4) +
+        "-" +
+        randomPart(4);
 
+        keys.push(key);
     }
 
     try{
@@ -247,19 +250,26 @@ async function generate(){
 
                 headers:{
                     "apikey":SUPABASE_KEY,
+
                     "Authorization":
                     "Bearer " + SUPABASE_KEY,
+
                     "Content-Type":
                     "application/json",
+
                     "Prefer":
                     "return=minimal"
                 },
 
                 body:JSON.stringify(
-                    keys.map(key => ({
-                        key:key,
-                        used:false
-                    }))
+                    keys.map(function(key){
+
+                        return {
+                            key:key,
+                            used:false
+                        };
+
+                    })
                 )
             }
         );
@@ -269,10 +279,13 @@ async function generate(){
             const erro =
             await response.text();
 
-            console.error(erro);
+            console.error(
+                "Erro Supabase:",
+                erro
+            );
 
             throw new Error(
-                "Erro ao salvar no Supabase."
+                "Não foi possível salvar as Keys."
             );
         }
 
@@ -290,7 +303,7 @@ async function generate(){
         textarea.value = "";
 
         status.textContent =
-        "Erro ao salvar as Keys. Verifique a configuração.";
+        "❌ Erro ao salvar as Keys.";
 
     }
 
@@ -298,17 +311,20 @@ async function generate(){
 }
 
 
-/* ================================
-   COPIAR
-================================ */
+/* =================================
+   COPIAR KEYS
+================================= */
 
 async function copyKeys(){
 
-    const text =
-    document.getElementById("keys").value;
+    const textarea =
+    document.getElementById("keys");
 
     const status =
     document.getElementById("status");
+
+    const text =
+    textarea.value;
 
     if(!text){
 
@@ -318,10 +334,23 @@ async function copyKeys(){
         return;
     }
 
-    await navigator.clipboard.writeText(text);
+    try{
 
-    status.textContent =
-    "Keys copiadas!";
+        await navigator.clipboard.writeText(text);
+
+        status.textContent =
+        "✅ Keys copiadas!";
+
+    }catch(error){
+
+        textarea.select();
+
+        document.execCommand("copy");
+
+        status.textContent =
+        "✅ Keys copiadas!";
+
+    }
 }
 
 </script>
